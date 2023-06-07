@@ -64,18 +64,18 @@ export const signIn = (req, res) => {
                     }
                 })
         } else if (login_by === 'google') {
-            let {user} = req.body.firebaseCred
-            userModel.findOne({email:user.email}).then((userExist)=>{
-                if(userExist){
+            let { user } = req.body.firebaseCred
+            userModel.findOne({ email: user.email }).then((userExist) => {
+                if (userExist) {
                     res.status(200)
-                            .json({ logIn: 'success', token })
-                }else{
+                        .json({ logIn: 'success', token })
+                } else {
                     let newUser = new userModel({
-                        name:user.displayName,
-                        email:user.email,
-                        phone:user.phoneNumber ?? null
+                        name: user.displayName,
+                        email: user.email,
+                        phone: user.phoneNumber ?? null
                     })
-                    newUser.save().then(()=>{
+                    newUser.save().then(() => {
                         const token = generateToken({
                             userId: user._id
                         })
@@ -114,10 +114,13 @@ export const createOrder = (req, res) => {
 
 export const getOrders = (req, res) => {
     try {
-        const user_id = req.query.user_id  
-        orderModel.find({ user_id }).then((orders) => {
-            res.status(200).json(orders)
-        })
+        const user_id = req.query.user_id
+        orderModel
+            .find({ user_id })
+            .populate('user_id')
+            .then((orders) => {
+                res.status(200).json(orders)
+            })
     } catch (err) {
         res.status(500)
             .json({ message: 'server failed' })
